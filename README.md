@@ -3,7 +3,7 @@
 
 # ide.js
 
-ide.js houses entity definitions for use in the Mat3ra platform.
+Infrastructure DEfinitions - ide.js - houses Infrastructure entity definitions for use in the Mat3ra platform.
 
 
 ### Installation
@@ -91,3 +91,8 @@ when executing a workflow. The main entities provided by `IDe` are not quite the
 
 and are used in slightly different ways within `WoDe` and the platform directly.
 
+## Links
+
+1. Overview of the platform Infrastructure: https://docs.mat3ra.com/infrastructure/overview/
+2. Clusters in the infrastructure: https://docs.mat3ra.com/infrastructure/clusters/overview/
+3. Resource management overview: https://docs.mat3ra.com/infrastructure/resource/overview/
