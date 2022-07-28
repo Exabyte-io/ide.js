@@ -79,3 +79,15 @@ npm run lint:fix
 In which case, you may need to then add the linter edits to your staging, which in the example above, puts the
 file back to identical with the base branch, resulting in no staged changes whatsoever.
 
+IDe
+===
+
+The `IDe` package sits adjacent to `WoDe` in the Mat3ra workflow ecosystem in that workflows are
+intended to be independent and de-coupled from the details of the computational parameters employed
+when executing a workflow. The main entities provided by `IDe` are not quite the same as other `De` libraries:
+
+- `ComputedEntityMixin` - provides methods for managing compute-specific parameters
+- `RMSNotificationHandler` - wrapped in an enum for email notifications
+
+and are used in slightly different ways within `WoDe` and the platform directly.
+
