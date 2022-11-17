@@ -1,11 +1,6 @@
 import { expect } from "chai";
 
-import {
-    wallTimeToDays,
-    wallTimeToHours,
-    wallTimeToMinutes,
-    wallTimeToSeconds,
-} from "./time";
+import { wallTimeToDays, wallTimeToHours, wallTimeToMinutes, wallTimeToSeconds } from "./time";
 
 describe("time", () => {
     it("wallTimeToSeconds", () => {
