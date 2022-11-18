@@ -7,8 +7,8 @@ export function getDefaultComputeConfig() {
         notify: "n",
         cluster: {
             fqdn: "",
-        }
-    }
+        },
+    };
 }
 
 export function getExternalBucket() {
@@ -16,5 +16,5 @@ export function getExternalBucket() {
         name: "",
         provider: "",
         region: "",
-    }
+    };
 }

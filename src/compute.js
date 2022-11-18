@@ -1,10 +1,9 @@
 import lodash from "lodash";
 import pluralize from "pluralize";
 
-import {wallTimeToHours} from "./utils/time";
-
-import { getExternalBucket, getDefaultComputeConfig } from "./default";
+import { getDefaultComputeConfig, getExternalBucket } from "./default";
 import { QUEUE_TYPES } from "./nodes/enums";
+import { wallTimeToHours } from "./utils/time";
 
 export const ComputedEntityMixin = (superclass) => class extends superclass {
     static getDefaultComputeConfig = getDefaultComputeConfig;
@@ -71,20 +70,31 @@ export const ComputedEntityMixin = (superclass) => class extends superclass {
 
     // helper to form a string
     get computeNodesAndPPN() {
-        return this.computeNodes + " " + pluralize("node", this.computeNodes) + " x " +
-            this.computePPN + " " + pluralize("core", this.computePPN);
+        return (
+            this.computeNodes
+        + " "
+        + pluralize("node", this.computeNodes)
+        + " x "
+        + this.computePPN
+        + " "
+        + pluralize("core", this.computePPN)
+        );
     }
 
     getApproximateCharge(settings, queueMultipliers = null) {
         const timeLimitInHours = wallTimeToHours(this.timeLimit);
-        const chargeRate = (this.owner && this.owner.serviceLevel && this.owner.serviceLevel.nameBasedModifier || 2)
-            *
-            settings.baseChargeRate
-            *
-            queueMultipliers ? queueMultipliers[this.computeQueue] : 1;
+        const chargeRate = ((this.owner
+          && this.owner.serviceLevel
+          && this.owner.serviceLevel.nameBasedModifier)
+          || 2)
+        * settings.baseChargeRate
+        * queueMultipliers
+            ? queueMultipliers[this.computeQueue]
+            : 1;
         return chargeRate * timeLimitInHours * this.computePPN;
     }
 
+    // eslint-disable-next-line class-methods-use-this
     get timePrediction() {
         // TODO: re-add
         return 0;
@@ -95,35 +105,48 @@ export const ComputedEntityMixin = (superclass) => class extends superclass {
     }
 
     get hasWarnings() {
-        return this.warnings.map(o => o.condition).some(x => x);
+        return this.warnings.map((o) => o.condition).some((x) => x);
     }
 
     /*
      * Array of warning Objects: [{condition: Boolean, message: String}]. Computed in-memory per Entity.
      */
-    get warnings() {return []}
+    // eslint-disable-next-line class-methods-use-this
+    get warnings() {
+        return [];
+    }
 
-    get isExternalJob() {return this.prop("isExternal", false)}
+    get isExternalJob() {
+        return this.prop("isExternal", false);
+    }
 
     /**
      * @summary Returns the bucket name for this object storage items. Bucket name is constructed from cluster FQDN.
      * @example master-vagrant-cluster-001.exabyte.io ==> vagrant-cluster-001
      */
     get bucket() {
-        if (this.isExternalJob) return (this._getExternalBucket) ? this._getExternalBucket().name : getExternalBucket().name;
+        if (this.isExternalJob) {
+            return this._getExternalBucket
+                ? this._getExternalBucket().name
+                : getExternalBucket().name;
+        }
         return this.clusterFqdn.match(/master-(.*).exabyte.io/)[1];
     }
 
     /*
-    * @summary: returns files root directory.
-    * For items created before 01/11/2018 00:00:00 UTC, path is started with either /home or /share.
-    * For items after 01/11/2018 00:00:00 UTC, path is started with either /cluster-00N-home or /cluster-00N-share.
-    */
+     * @summary: returns files root directory.
+     * For items created before 01/11/2018 00:00:00 UTC, path is started with either /home or /share.
+     * For items after 01/11/2018 00:00:00 UTC, path is started with either /cluster-00N-home or /cluster-00N-share.
+     */
     get filesRootDir() {
         if (this.isExternalJob) return `${this.prop("owner").slug}/${this.id}`;
-        if ((new Date(this.createdAt)).getTime() <= 1515628800000) return this.workDir;
-        const clusterAlias = this.clusterFqdn.match(/master.*(cluster-.*).exabyte.io/)[1];
-        const prefix = this.owner.isPersonal ? `/${clusterAlias}-home` : `/${clusterAlias}-share`;
+        if (new Date(this.createdAt).getTime() <= 1515628800000) return this.workDir;
+        const clusterAlias = this.clusterFqdn.match(
+            /master.*(cluster-.*).exabyte.io/,
+        )[1];
+        const prefix = this.owner.isPersonal
+            ? `/${clusterAlias}-home`
+            : `/${clusterAlias}-share`;
         return `${prefix}/${this.workDir.split("/").slice(2).join("/")}`;
     }
 
@@ -139,7 +162,7 @@ export const ComputedEntityMixin = (superclass) => class extends superclass {
         const hostname = lodash.get(config, "compute.cluster.fqdn");
         const node = backendManager.getNodeByHostname(hostname);
         if (!node) config.compute = this.getDefaultComputeConfig();
-        config.compute.cluster && delete config.compute.cluster.jid;
+        if (config.compute.cluster) delete config.compute.cluster.jid;
         delete config.compute.errors;
     }
 };
