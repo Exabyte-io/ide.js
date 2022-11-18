@@ -23,7 +23,7 @@ export function wallTimeTo(walltime, units) {
 
     if (parts.length < 3 || !walltime.match(regex)) {
         throw new Error(
-      `Unexpected walltime format: ${walltime}. Allowed formats: '00:05:00', '99:999:59:59'`,
+            `Unexpected walltime format: ${walltime}. Allowed formats: '00:05:00', '99:999:59:59'`,
         );
     }
 
@@ -32,10 +32,8 @@ export function wallTimeTo(walltime, units) {
     const hours = parseFloat(parts[2]);
     const days = parts[3] ? parseFloat(parts[3]) : 0;
 
-    const totalSeconds = seconds
-    + minutes * MULTIPLIERS.m
-    + hours * MULTIPLIERS.h
-    + days * MULTIPLIERS.d;
+    const totalSeconds =
+        seconds + minutes * MULTIPLIERS.m + hours * MULTIPLIERS.h + days * MULTIPLIERS.d;
     return totalSeconds / MULTIPLIERS[units];
 }
 
@@ -81,6 +79,5 @@ export function timestampToDate(timestamp = false, millisec = false) {
 }
 
 export function daysAgoToDate(days) {
-    return moment().utc().startOf("day").subtract(days, "days")
-        .toDate();
+    return moment().utc().startOf("day").subtract(days, "days").toDate();
 }
