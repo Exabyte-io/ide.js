@@ -82,7 +82,7 @@ export const TIME_LIMIT_TYPES = {
     compound: "compound",
 };
 
-export const IS_RESTARTABLE = {
+export const IS_RERUNNABLE = {
     yes: true,
     no: false,
 };
