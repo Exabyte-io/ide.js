@@ -84,15 +84,11 @@ export const ComputedEntityMixin = (superclass) =>
 
         getApproximateCharge(settings, queueMultipliers = null) {
             const timeLimitInHours = wallTimeToHours(this.timeLimit);
-            const chargeRate =
-                ((this.owner &&
-                    this.owner.serviceLevel &&
-                    this.owner.serviceLevel.nameBasedModifier) ||
-                    2) *
-                settings.baseChargeRate *
-                queueMultipliers
-                    ? queueMultipliers[this.computeQueue]
-                    : 1;
+
+            const queueMultiplier = queueMultipliers ? queueMultipliers[this.computeQueue] : 1;
+            const rateModifier = this.owner?.serviceLevel?.nameBasedModifier || 1;
+            const chargeRate = settings.baseChargeRate * rateModifier * queueMultiplier;
+
             return chargeRate * timeLimitInHours * this.computePPN;
         }
 
