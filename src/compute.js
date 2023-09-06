@@ -128,7 +128,7 @@ export const ComputedEntityMixin = (superclass) =>
                     ? this._getExternalBucket().name
                     : getExternalBucket().name;
             }
-            return this.clusterFqdn.match(/master-(.*).exabyte.io/)[1];
+            return this.clusterFqdn.match(/master-(.*).(exabyte.io|mat3ra.com)/)[1];
         }
 
         /*
@@ -139,7 +139,7 @@ export const ComputedEntityMixin = (superclass) =>
         get filesRootDir() {
             if (this.isExternalJob) return `${this.prop("owner").slug}/${this.id}`;
             if (new Date(this.createdAt).getTime() <= 1515628800000) return this.workDir;
-            const clusterAlias = this.clusterFqdn.match(/master.*(cluster-.*).exabyte.io/)[1];
+            const clusterAlias = this.clusterFqdn.match(/master.*(cluster-.*).(exabyte.io|mat3ra.com)/)[1];
             const prefix = this.owner.isPersonal
                 ? `/${clusterAlias}-home`
                 : `/${clusterAlias}-share`;
