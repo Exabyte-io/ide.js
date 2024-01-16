@@ -42,7 +42,7 @@
         "pluralize": "^3.0.0"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "2023.6.21-0",
+        "@exabyte-io/code.js": "^2024.1.16-0",
         "@exabyte-io/eslint-config": "^2022.11.17-0",
         "chai": "^4.3.4",
         "eslint": "7.32.0",
