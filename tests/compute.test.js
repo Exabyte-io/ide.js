@@ -1,5 +1,5 @@
 /* eslint-disable max-classes-per-file */
-import { InMemoryEntity } from "@exabyte-io/code.js/dist/entity";
+import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import { expect } from "chai";
 import { mix } from "mixwith";
 
