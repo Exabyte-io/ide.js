@@ -42,7 +42,8 @@
         "pluralize": "^3.0.0"
     },
     "devDependencies": {
-        "@exabyte-io/code.js": "2023.6.21-0",
+        "@mat3ra/code": "2024.3.25-3",
+        "@mat3ra/esse": "2024.3.25-6",
         "@exabyte-io/eslint-config": "^2022.11.17-0",
         "chai": "^4.3.4",
         "eslint": "7.32.0",
@@ -62,8 +63,12 @@
         "nyc": "^15.1.0",
         "prettier": "^2.7.1"
     },
+    "peerDependencies": {
+        "@mat3ra/code": "*",
+        "@mat3ra/esse": "*"
+    },
     "engines": {
-        "node": ">=12.0.0"
+        "node": ">=14.0.0"
     },
     "lint-staged": {
         "*.js": "eslint --cache --fix",
