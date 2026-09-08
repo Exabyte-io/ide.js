@@ -2,7 +2,7 @@ import { InMemoryEntity } from "@mat3ra/code/dist/js/entity";
 import type { AnyObject } from "@mat3ra/esse/dist/js/esse/types";
 import type { BaseInMemoryEntitySchema, QueueSchema } from "@mat3ra/esse/dist/js/types";
 
-import { ETA, QUEUE_DISPLAY } from "./enums";
+import { QUEUE_DISPLAY } from "./enums";
 
 export type QueueHostSchema = BaseInMemoryEntitySchema & QueueSchema & { hostname: string };
 
@@ -13,40 +13,19 @@ export type QueueSettings = {
 };
 
 /**
- * Minimal shape {@link Queue.getETA} needs from the host app's jobs store - deliberately not
- * `Mongo.Collection`, so this class carries no Meteor/Mongo dependency of its own; a real
- * collection satisfies this structurally, no adapter needed.
- */
-export interface QueueJobFinder {
-    findOneAsync(selector: {
-        "compute.queue": string;
-        startTime: string;
-    }): Promise<{ startTime?: string } | null | undefined>;
-}
-
-const sortedETA = Object.values(ETA).sort((a, b) => b.order - a.order);
-
-/**
  * A cluster queue. `queueSettings` (admin-configured per-queue overrides - a friendlier display
- * name, a premium maxPPN) and `jobs` (used only by {@link getETA}, to estimate wait time from
- * currently submitted jobs) are both passed in rather than reached for via a host-app-specific
- * singleton or global collection - keeps this class free of any such dependency, so it's equally
- * safe to construct on the client (where `jobs` is simply omitted - there's no live jobs store to
- * query there) and on the server (where the host app passes its own jobs collection).
+ * name, a premium maxPPN) is passed in rather than reached for via a host-app-specific singleton
+ * - keeps this class free of any such dependency. Estimating a queue's wait time needs a live
+ * query against the host app's own jobs store, which only ever makes sense server-side and has
+ * no place on a class that's also instantiated to represent a queue on the client - see the host
+ * app's own use case for that piece (e.g. web-app's `backendEntities/QueuesInfo`).
  */
 class Queue extends InMemoryEntity<QueueHostSchema> implements QueueSchema {
     declare _json: QueueHostSchema & AnyObject;
 
     private readonly queueSettings?: QueueSettings;
 
-    private readonly jobs?: QueueJobFinder;
-
-    constructor(
-        hostname: string,
-        config: QueueSchema,
-        queueSettings?: QueueSettings,
-        jobs?: QueueJobFinder,
-    ) {
+    constructor(hostname: string, config: QueueSchema, queueSettings?: QueueSettings) {
         // Ensure `displayName` is always present (schema field) even if backend omits it.
         const displayName =
             config.displayName ||
@@ -55,7 +34,6 @@ class Queue extends InMemoryEntity<QueueHostSchema> implements QueueSchema {
 
         super({ ...config, hostname, displayName });
         this.queueSettings = queueSettings;
-        this.jobs = jobs;
     }
 
     get name() {
@@ -143,35 +121,6 @@ class Queue extends InMemoryEntity<QueueHostSchema> implements QueueSchema {
      */
     get defaultMaxPPN(): number {
         return this.maxPPN;
-    }
-
-    /**
-     * @summary Estimates this queue's wait time from currently submitted jobs. Resolves to
-     * `ETA.withinFiveMin` (same fallback as "nothing queued") if no `jobs` finder was supplied
-     * at construction - the client-side case, where there's no live jobs store to query.
-     */
-    async getETA() {
-        // eslint-disable-next-line eqeqeq
-        if (this.maxAvailableNodect == 0) {
-            return ETA.moreThanHour;
-        }
-        if (!this.jobs) {
-            return ETA.withinFiveMin;
-        }
-
-        const { jobs, name } = this;
-        const job = await sortedETA.reduce<Promise<{ startTime?: string } | null | undefined>>(
-            async (acc, value) => {
-                const job = await acc;
-                if (job) {
-                    return job;
-                }
-                return jobs.findOneAsync({ "compute.queue": name, startTime: value.display });
-            },
-            Promise.resolve(undefined),
-        );
-
-        return Object.values(ETA).find((x) => x.display === job?.startTime) || ETA.withinFiveMin;
     }
 }
 

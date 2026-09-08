@@ -1,13 +1,9 @@
 import type { QueueSchema } from "@mat3ra/esse/dist/js/types";
 import { expect } from "chai";
 
-import Queue, { type QueueJobFinder, type QueueSettings } from "../../src/js/nodes/queue";
+import Queue, { type QueueSettings } from "../../src/js/nodes/queue";
 
-function makeQueue(
-    config: Partial<QueueSchema> = {},
-    queueSettings?: QueueSettings,
-    jobs?: QueueJobFinder,
-) {
+function makeQueue(config: Partial<QueueSchema> = {}, queueSettings?: QueueSettings) {
     return new Queue(
         "cluster-001",
         {
@@ -19,7 +15,6 @@ function makeQueue(
             ...config,
         },
         queueSettings,
-        jobs,
     );
 }
 
@@ -77,48 +72,5 @@ describe("Queue", () => {
         const queue = makeQueue({ maxPPN: 8 }, { maxPPN: 32 });
         expect(queue.maxPPN).to.equal(32);
         expect(queue.defaultMaxPPN).to.equal(32);
-    });
-
-    describe("getETA", () => {
-        it("returns 'more than 1 hour' when no nodes are available, without consulting jobs", async () => {
-            const queue = makeQueue(
-                { availableNodes: 0, currentNodes: 0, maxNodes: 10 },
-                undefined,
-                { findOneAsync: () => Promise.reject(new Error("should not be called")) },
-            );
-            expect((await queue.getETA()).display).to.equal("more than 1 hour");
-        });
-
-        it("returns 'less than 5 min' when no jobs finder was supplied (the client-side case)", async () => {
-            const queue = makeQueue({ availableNodes: 5, currentNodes: 5, maxNodes: 10 });
-            expect((await queue.getETA()).display).to.equal("less than 5 min");
-        });
-
-        it("returns 'less than 5 min' when the jobs finder has nothing queued for this queue", async () => {
-            const queue = makeQueue(
-                { availableNodes: 5, currentNodes: 5, maxNodes: 10 },
-                undefined,
-                {
-                    findOneAsync: () => Promise.resolve(undefined),
-                },
-            );
-            expect((await queue.getETA()).display).to.equal("less than 5 min");
-        });
-
-        it("matches the highest-order ETA among currently submitted jobs for this queue", async () => {
-            const queue = makeQueue(
-                { availableNodes: 5, currentNodes: 5, maxNodes: 10 },
-                undefined,
-                {
-                    findOneAsync: (selector) =>
-                        Promise.resolve(
-                            selector.startTime === "within 1 hour"
-                                ? { startTime: "within 1 hour" }
-                                : undefined,
-                        ),
-                },
-            );
-            expect((await queue.getETA()).display).to.equal("within 1 hour");
-        });
     });
 });
